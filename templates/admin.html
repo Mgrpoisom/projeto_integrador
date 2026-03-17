@@ -30,6 +30,10 @@
                     <div id="vagasOcupadas" class="badge" style="background: #ef4444; font-size: 1.5rem; padding: 0.5rem 1.5rem;">0</div>
                 </div>
                 <div>
+                    <h3>Disponíveis</h3>
+                    <div id="vagasDisponiveis" class="badge" style="background: #10b981; font-size: 1.5rem; padding: 0.5rem 1.5rem;">0</div>
+                </div>
+                <div>
                     <h3>Na Fila</h3>
                     <div id="naFila" class="badge" style="background: #f59e0b; font-size: 1.5rem; padding: 0.5rem 1.5rem;">0</div>
                 </div>
@@ -72,6 +76,7 @@
             const stats = await res.json();
             document.getElementById('totalVagas').innerText = stats.capacidade_total;
             document.getElementById('vagasOcupadas').innerText = stats.vagas_ocupadas;
+            document.getElementById('vagasDisponiveis').innerText = stats.vagas_disponiveis;
             document.getElementById('naFila').innerText = stats.na_fila;
             document.getElementById('novaCapacidade').value = stats.capacidade_total;
 
