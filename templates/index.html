@@ -82,6 +82,7 @@
                             <th>Iniciais</th>
                             <th>Categoria</th>
                             <th>Pontuação</th>
+                            <th>Detalhes</th>
                         </tr>
                     </thead>
                     <tbody id="filaBody">
@@ -146,9 +147,35 @@
                         <td>${iniciais}</td>
                         <td>${c.categoria}</td>
                         <td>${c.pontuacao} pts</td>
+                        <td>
+                            <button class="btn-icon" onclick="verDetalhes(${c.id})" title="Ver detalhes">
+                                👁️
+                            </button>
+                        </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function verDetalhes(id) {
+            const crianca = dadosFilaOriginal.find(c => c.id === id);
+            if (crianca) {
+                document.getElementById('modalNome').innerText = crianca.nome;
+                document.getElementById('modalResponsavel').innerText = crianca.responsavel;
+                document.getElementById('detalhesModal').classList.add('active');
+            }
+        }
+
+        function fecharModal() {
+            document.getElementById('detalhesModal').classList.remove('active');
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = (event) => {
+            const modal = document.getElementById('detalhesModal');
+            if (event.target == modal) {
+                fecharModal();
+            }
         }
 
         function filtrarFila() {
@@ -171,5 +198,21 @@
     <footer>
         <p>&copy; 2026 Projeto Integrador - Gestão de Creches</p>
     </footer>
+
+    <!-- Modal de Detalhes -->
+    <div id="detalhesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="fecharModal()">&times;</span>
+            <h2>Ficha do Solicitante</h2>
+            <div class="modal-info">
+                <span>Criança</span>
+                <p id="modalNome">-</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 1rem 0;">
+                <span>Responsável</span>
+                <p id="modalResponsavel">-</p>
+            </div>
+            <button class="btn-primary" onclick="fecharModal()">Fechar</button>
+        </div>
+    </div>
 </body>
 </html>
