@@ -14,10 +14,11 @@ A creche atende crianças de 0 a 3 anos divididas em:
 - **Maternal II:** cerca de 3 anos.
 
 ## Funcionalidades Principais do Protótipo
-1. **Cadastro e Triagem:** Registro completo com cálculo automático de prioridade (vulnerabilidade, trabalho, etc.).
-2. **Dashboard Administrativo:** Painel exclusivo para gestores com estatísticas em tempo real e controle de capacidade.
-3. **Fila Transparente:** Consulta pública com busca por iniciais e filtros por faixa etária (B1, B2, M1, M2).
-4. **Infraestrutura Real:** Banco de dados PostgreSQL rodando em Docker com persistência local.
+1. **Cadastro e Triagem:** Registro com cálculo automático de prioridade.
+2. **Dashboard Administrativo:** Painel para gestores com estatísticas e controle de capacidade.
+3. **Ciclo de Vagas:** Opção de "Registrar Saída" que libera a vaga e matricula automaticamente o próximo da fila.
+4. **Fila Transparente:** Busca por iniciais e filtros por categoria.
+5. **Infraestrutura:** Banco de dados PostgreSQL com Docker.
 
 ## Fundamentação Jurídica
 O projeto baseia-se no direito fundamental à educação infantil (CF Art. 208, IV; ECA Art. 54, IV; LDB Art. 4º, II).

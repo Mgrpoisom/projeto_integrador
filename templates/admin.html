@@ -87,17 +87,17 @@
                     <td>
                         <div style="display: flex; gap: 0.5rem;">
                             ${c.status === 'aguardando' ? 
-                                `<button onclick="matricularManual(${c.id})" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Matricular</button>` : 
-                                ''}
-                            <button onclick="registrarSaida(${c.id}, '${c.nome}')" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444;">Saída</button>
+                                `<button onclick="matricularManual(${c.id})" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Matricular</button>
+                                 <button onclick="registrarSaida(${c.id}, '${c.nome}', 'Remover da Fila')" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #64748b;">Remover</button>` : 
+                                `<button onclick="registrarSaida(${c.id}, '${c.nome}', 'Registrar Saída')" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444;">Saída</button>`}
                         </div>
                     </td>
                 </tr>
             `).join('');
         }
 
-        async function registrarSaida(id, nome) {
-            if(confirm(`Deseja registrar a saída/abandono de ${nome}? Isso liberará uma vaga.`)) {
+        async function registrarSaida(id, nome, acao = 'Registrar Saída') {
+            if(confirm(`Deseja ${acao.toLowerCase()} de ${nome}?`)) {
                 const res = await fetch(`/api/admin/remover/${id}`, {method: 'POST'});
                 const data = await res.json();
                 alert(data.mensagem);

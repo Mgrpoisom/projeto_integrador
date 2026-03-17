@@ -27,5 +27,5 @@
     - [x] Adicionar busca por nome/CPF na consulta pública
     - [x] Implementar filtros por categoria (Berçário/Maternal)
     - [x] Adicionar botões de ação na Admin (Matricular Manual, Editar)
-    - [ ] Implementar fluxo de "Saída/Abandono" (Liberação de vaga)
-    - [ ] Criar lógica de preenchimento automático de vaga aberta pela fila
+    - [x] Implementar fluxo de "Saída/Abandono" (Liberação de vaga)
+    - [x] Criar lógica de preenchimento automático de vaga aberta pela fila
