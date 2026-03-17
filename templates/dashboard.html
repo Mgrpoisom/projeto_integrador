@@ -50,6 +50,14 @@
                 </div>
             </div>
 
+            <!-- Gráfico 3: Distribuição por Bairro -->
+            <div class="card">
+                <h2>Distribuição por Bairro</h2>
+                <div style="height: 250px;">
+                    <canvas id="chartBairro"></canvas>
+                </div>
+            </div>
+
             <div class="card" style="background: #f1f5f9; display: flex; flex-direction: column; justify-content: center;">
                 <h3 style="color: #475569; margin-top: 0;">Dica de Gestão</h3>
                 <p id="insightTexto">Carregando insights...</p>
@@ -121,6 +129,25 @@
                     responsive: true, 
                     maintainAspectRatio: false,
                     plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Gráfico de Bairros (Barras Horizontais)
+            new Chart(document.getElementById('chartBairro'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.dist_bairro),
+                    datasets: [{
+                        label: 'Crianças',
+                        data: Object.values(data.dist_bairro),
+                        backgroundColor: '#6366f1',
+                    }]
+                },
+                options: { 
+                    indexAxis: 'y',
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
                 }
             });
         }

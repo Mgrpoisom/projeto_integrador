@@ -16,6 +16,8 @@ class Crianca(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     data_nascimento = db.Column(db.Date, nullable=False)
     responsavel = db.Column(db.String(100), nullable=False)
+    bairro = db.Column(db.String(100))
+    telefone = db.Column(db.String(20))
     categoria = db.Column(db.String(20)) # B1, B2, M1, M2
     pontuacao = db.Column(db.Integer, default=0)
     status = db.Column(db.String(20), default='aguardando') # aguardando, matriculada

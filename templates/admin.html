@@ -56,9 +56,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Nome Completo</th>
+                            <th>Nome</th>
                             <th>Responsável</th>
-                            <th>Categoria</th>
+                            <th>Bairro</th>
+                            <th>Contato</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -88,7 +89,8 @@
                 <tr>
                     <td>${c.nome}</td>
                     <td>${c.responsavel}</td>
-                    <td>${c.categoria}</td>
+                    <td>${c.bairro || '-'}</td>
+                    <td>${c.telefone || '-'}</td>
                     <td><span class="badge" style="background: ${c.status === 'matriculada' ? '#10b981' : '#f59e0b'}">${c.status}</span></td>
                     <td>
                         <div style="display: flex; gap: 0.5rem;">

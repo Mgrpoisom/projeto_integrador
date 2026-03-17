@@ -34,7 +34,17 @@
                     </div>
                     <div class="form-group">
                         <label for="responsavel">Nome do Responsável</label>
-                        <input type="text" id="responsavel" required placeholder="Nome do pai, mãe ou tutor">
+                        <input type="text" id="responsavel" name="responsavel" required placeholder="Nome do pai, mãe ou tutor">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="bairro">Bairro</label>
+                            <input type="text" id="bairro" name="bairro" placeholder="Ex: Centro" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefone">Telefone para Contato</label>
+                            <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" required>
+                        </div>
                     </div>
                     <div class="vulnerabilidade-group">
                         <h3>Critérios de Prioridade</h3>
@@ -89,6 +99,8 @@
                 nome: document.getElementById('nome').value,
                 data_nascimento: document.getElementById('data_nascimento').value,
                 responsavel: document.getElementById('responsavel').value,
+                bairro: document.getElementById('bairro').value,
+                telefone: document.getElementById('telefone').value,
                 vulnerabilidade: {
                     mae_trabalha: document.getElementById('mae_trabalha').checked,
                     baixa_renda: document.getElementById('baixa_renda').checked,

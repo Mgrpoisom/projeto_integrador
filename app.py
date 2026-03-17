@@ -48,6 +48,8 @@ def cadastrar():
             nome=data['nome'],
             data_nascimento=data_nasc,
             responsavel=data['responsavel'],
+            bairro=data.get('bairro'),
+            telefone=data.get('telefone'),
             categoria=categoria,
             pontuacao=pontuacao,
             status='aguardando'
@@ -115,8 +117,9 @@ def admin_criancas():
         "nome": c.nome,
         "responsavel": c.responsavel,
         "categoria": c.categoria,
-        "pontuacao": c.pontuacao,
         "status": c.status,
+        "bairro": c.bairro,
+        "telefone": c.telefone,
         "data_cadastro": c.data_cadastro.strftime('%d/%m/%Y %H:%M')
     } for c in criancas])
 
@@ -186,11 +189,17 @@ def dashboard_stats():
         .group_by(Crianca.status).all()
     dist_status = {s: count for s, count in status_counts}
 
-    # 3. Perfil de Vulnerabilidade
+    # 3. Distribuição por Bairro (Novo Insight)
+    bairros_query = db.session.query(Crianca.bairro, db.func.count(Crianca.id))\
+        .filter(Crianca.bairro.isnot(None))\
+        .group_by(Crianca.bairro).all()
+    dist_bairro = {b: count for b, count in bairros_query}
+
+    # 4. Perfil de Vulnerabilidade
     com_vulnerabilidade = Crianca.query.filter(Crianca.pontuacao > 0).count()
     sem_vulnerabilidade = Crianca.query.filter(Crianca.pontuacao == 0).count()
 
-    # 4. KPIs
+    # 5. KPIs
     unidade = Unidade.query.first()
     matriculas = Matricula.query.count()
     tempo_medio = "45 dias" if matriculas > 0 else "N/A"
@@ -198,6 +207,7 @@ def dashboard_stats():
     return jsonify({
         "breakdown_categoria": breakdown_data,
         "labels": labels_base,
+        "dist_bairro": dist_bairro,
         "perfil_vulnerabilidade": {
             "Com Prioridade": com_vulnerabilidade,
             "Sem Prioridade": sem_vulnerabilidade
