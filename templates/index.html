@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Creches</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Portal de Creches Municipais</h1>
+            <ul>
+                <li><a href="#">Início</a></li>
+                <li><a href="#">Consulta de Fila</a></li>
+                <li><a href="#">Administração</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="container">
+            <div class="card">
+                <h2>Cadastro de Solicitação</h2>
+                <form id="cadastroForm">
+                    <div class="form-group">
+                        <label for="nome">Nome da Criança</label>
+                        <input type="text" id="nome" required placeholder="Nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="data_nascimento">Data de Nascimento</label>
+                        <input type="date" id="data_nascimento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="responsavel">Nome do Responsável</label>
+                        <input type="text" id="responsavel" required placeholder="Nome do pai, mãe ou tutor">
+                    </div>
+                    <div class="vulnerabilidade-group">
+                        <h3>Critérios de Prioridade</h3>
+                        <label><input type="checkbox" id="mae_trabalha"> Responsável Trabalha</label>
+                        <label><input type="checkbox" id="baixa_renda"> Baixa Renda / CadÚnico</label>
+                        <label><input type="checkbox" id="necessidades_especiais"> Necessidades Especiais</label>
+                    </div>
+                    <button type="submit" class="btn-primary">Enviar Solicitação</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Lista de Espera Transparente</h2>
+                <div id="statusUnidade"></div>
+                <table id="filaTable">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Iniciais</th>
+                            <th>Categoria</th>
+                            <th>Pontuação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filaBody">
+                        <!-- Preenchido via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.getElementById('cadastroForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                nome: document.getElementById('nome').value,
+                data_nascimento: document.getElementById('data_nascimento').value,
+                responsavel: document.getElementById('responsavel').value,
+                vulnerabilidade: {
+                    mae_trabalha: document.getElementById('mae_trabalha').checked,
+                    baixa_renda: document.getElementById('baixa_renda').checked,
+                    necessidades_especiais: document.getElementById('necessidades_especiais').checked
+                }
+            };
+
+            const response = await fetch('/api/cadastrar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            alert(result.mensagem || result.erro);
+            if (!result.erro) {
+                location.reload();
+            }
+        };
+
+        async function carregarFila() {
+            const resFila = await fetch('/api/fila');
+            const fila = await resFila.json();
+            const body = document.getElementById('filaBody');
+            body.innerHTML = fila.map(c => `
+                <tr>
+                    <td>${c.posicao}º</td>
+                    <td>${c.nome.split(' ').map(n => n[0]).join('')}.</td>
+                    <td>${c.categoria}</td>
+                    <td>${c.pontuacao} pts</td>
+                </tr>
+            `).join('');
+
+            const resStatus = await fetch('/api/status');
+            const status = await resStatus.json();
+            document.getElementById('statusUnidade').innerHTML = `
+                <p><strong>Unidade:</strong> ${status.unidade}</p>
+                <p><strong>Vagas Disponíveis:</strong> <span class="badge">${status.vagas_disponiveis}</span></p>
+            `;
+        }
+        carregarFila();
+    </script>
+
+    <footer>
+        <p>&copy; 2026 Projeto Integrador - Gestão de Creches</p>
+    </footer>
+</body>
+</html>

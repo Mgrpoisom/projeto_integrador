@@ -1,0 +1,21 @@
+# Tarefas para Implementação do Sistema de Gestão de Creches
+
+- [ ] **Configuração e Modelagem**
+    - [x] Criar arquivo `models.py` com `Crianca`, `Unidade` e `Matricula`
+    - [x] Integrar `models.py` no `app.py`
+    - [x] Configurar criação automática do banco
+- [x] **Lógica de Negócio (Motor de Prioridade)**
+    - [x] Implementar função para categorização automática por idade (B1, B2, M1, M2)
+    - [x] Implementar cálculo de pontuação de prioridade (Critérios: Vulnerabilidade, Trabalho dos Pais, etc.)
+    - [x] Implementar lógica de "Gestão Automática" de vagas
+- [x] **Interface (Frontend)**
+    - [x] Criar formulário de cadastro de crianças
+    - [x] Criar visualização da lista de espera com transparência (posições na fila)
+    - [x] Integrar formulários com o backend via API
+- [ ] **Infraestrutura e Segurança**
+    - [x] Criar arquivo `.env` para gestão de segredos
+    - [x] Configurar Docker para PostgreSQL
+    - [ ] Criar imagem Docker do banco de dados
+- [x] **Verificação e Testes**
+    - [x] Criar testes unitários para a lógica de prioridade
+    - [x] Validar fluxo de matrícula automática ao liberar vaga
