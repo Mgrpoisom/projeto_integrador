@@ -77,6 +77,7 @@ def ver_fila():
     fila = Crianca.query.filter_by(status='aguardando').order_by(Crianca.pontuacao.desc(), Crianca.data_cadastro.asc()).all()
     resultado = [{
         "nome": c.nome,
+        "responsavel": c.responsavel,
         "categoria": c.categoria,
         "pontuacao": c.pontuacao,
         "posicao": i + 1
