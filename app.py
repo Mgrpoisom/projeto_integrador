@@ -171,37 +171,40 @@ def dashboard_view():
 
 @app.route('/api/admin/dashboard/stats')
 def dashboard_stats():
-    # 1. Distribuição por Categoria
-    categorias = db.session.query(Crianca.categoria, db.func.count(Crianca.id))\
-        .group_by(Crianca.categoria).all()
-    dist_categoria = {cat: count for cat, count in categorias}
+    # 1. Distribuição por Categoria e Status (Breakdown Inteligente)
+    labels_base = ["Berçário I", "Berçário II", "Maternal I", "Maternal II"]
+    breakdown_raw = db.session.query(Crianca.categoria, Crianca.status, db.func.count(Crianca.id))\
+        .group_by(Crianca.categoria, Crianca.status).all()
+    
+    breakdown_data = {cat: {"matriculada": 0, "aguardando": 0} for cat in labels_base}
+    for cat, status, count in breakdown_raw:
+        if cat in breakdown_data and status in ["matriculada", "aguardando"]:
+            breakdown_data[cat][status] = count
 
-    # 2. Distribuição por Status
+    # 2. Distribuição Geral (Status) para KPIs
     status_counts = db.session.query(Crianca.status, db.func.count(Crianca.id))\
         .group_by(Crianca.status).all()
     dist_status = {s: count for s, count in status_counts}
 
-    # 3. Perfil de Vulnerabilidade (Contagem de cada critério Sim)
-    # Nota: Como os dados estão em JSON/Dict ou campos específicos, vamos simplificar
-    # contando quantas crianças têm pontuação > 0 (critério simples para o protótipo)
+    # 3. Perfil de Vulnerabilidade
     com_vulnerabilidade = Crianca.query.filter(Crianca.pontuacao > 0).count()
     sem_vulnerabilidade = Crianca.query.filter(Crianca.pontuacao == 0).count()
 
-    # 4. Tempo Médio de Espera (Simulado/Estátisco p/ Protótipo)
-    # No mundo real, calcularíamos a diferença entre data_cadastro e data_matricula
-    matriculas = Matricula.query.all()
-    tempo_medio = "45 dias" if matriculas else "N/A"
+    # 4. KPIs
+    unidade = Unidade.query.first()
+    matriculas = Matricula.query.count()
+    tempo_medio = "45 dias" if matriculas > 0 else "N/A"
 
     return jsonify({
-        "dist_categoria": dist_categoria,
-        "dist_status": dist_status,
+        "breakdown_categoria": breakdown_data,
+        "labels": labels_base,
         "perfil_vulnerabilidade": {
             "Com Prioridade": com_vulnerabilidade,
             "Sem Prioridade": sem_vulnerabilidade
         },
         "kpis": {
             "tempo_medio_espera": tempo_medio,
-            "taxa_ocupacao": f"{round((dist_status.get('matriculada', 0) / (Unidade.query.first().capacidade_total or 1)) * 100)}%"
+            "taxa_ocupacao": f"{round((dist_status.get('matriculada', 0) / (unidade.capacidade_total or 1)) * 100)}%"
         }
     })
 

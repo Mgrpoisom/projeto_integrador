@@ -34,28 +34,25 @@
                 </div>
             </div>
 
-            <!-- Gráfico 1: Categorias -->
-            <div class="card">
-                <h2>Crianças por Categoria</h2>
-                <div style="height: 300px;">
-                    <canvas id="chartCategorias"></canvas>
+            <!-- Gráfico 1: Ocupação e Fila por Categoria (O Mais Inteligente) -->
+            <div class="card" style="grid-column: span 2;">
+                <h2>Distribuição por Faixa Etária (Matrículas vs Espera)</h2>
+                <div style="height: 350px;">
+                    <canvas id="chartBreakdown"></canvas>
                 </div>
             </div>
 
             <!-- Gráfico 2: Perfil Vulnerabilidade -->
             <div class="card">
                 <h2>Perfil de Prioridade</h2>
-                <div style="height: 300px;">
+                <div style="height: 250px;">
                     <canvas id="chartVulnerabilidade"></canvas>
                 </div>
             </div>
 
-            <!-- Gráfico 3: Status Geral -->
-            <div class="card" style="grid-column: span 2;">
-                <h2>Status das Solicitações</h2>
-                <div style="height: 300px;">
-                    <canvas id="chartStatus"></canvas>
-                </div>
+            <div class="card" style="background: #f1f5f9; display: flex; flex-direction: column; justify-content: center;">
+                <h3 style="color: #475569; margin-top: 0;">Dica de Gestão</h3>
+                <p id="insightTexto">Carregando insights...</p>
             </div>
         </div>
     </main>
@@ -69,19 +66,45 @@
             document.getElementById('kpiTempo').innerText = data.kpis.tempo_medio_espera;
             document.getElementById('kpiOcupacao').innerText = data.kpis.taxa_ocupacao;
 
-            // Gráfico de Categorias (Barras)
-            new Chart(document.getElementById('chartCategorias'), {
+            // Gerar Insight dinâmico
+            const totalFila = Object.values(data.breakdown_categoria).reduce((acc, cat) => acc + cat.aguardando, 0);
+            document.getElementById('insightTexto').innerText = totalFila > 3 
+                ? `Atenção: Há ${totalFila} crianças aguardando vaga. Considere ampliar a capacidade das categorias sob maior pressão.`
+                : "A demanda está estável e controlada no momento.";
+
+            // Gráfico de Breakdown por Categoria (Barras Empilhadas)
+            const labels = data.labels;
+            const matriculadas = labels.map(l => data.breakdown_categoria[l].matriculada);
+            const aguardando = labels.map(l => data.breakdown_categoria[l].aguardando);
+
+            new Chart(document.getElementById('chartBreakdown'), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(data.dist_categoria),
-                    datasets: [{
-                        label: 'Quantidade',
-                        data: Object.values(data.dist_categoria),
-                        backgroundColor: '#2563eb',
-                        borderRadius: 6
-                    }]
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Matriculadas',
+                            data: matriculadas,
+                            backgroundColor: '#10b981', // Verde
+                        },
+                        {
+                            label: 'Na Fila',
+                            data: aguardando,
+                            backgroundColor: '#f59e0b', // Laranja
+                        }
+                    ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
             });
 
             // Gráfico de Vulnerabilidade (Pizza)
@@ -91,23 +114,14 @@
                     labels: Object.keys(data.perfil_vulnerabilidade),
                     datasets: [{
                         data: Object.values(data.perfil_vulnerabilidade),
-                        backgroundColor: ['#f59e0b', '#cbd5e1']
+                        backgroundColor: ['#6366f1', '#e2e8f0']
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            // Gráfico de Status (Linha ou Barra Horizontal)
-            new Chart(document.getElementById('chartStatus'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(data.dist_status),
-                    datasets: [{
-                        data: Object.values(data.dist_status),
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
             });
         }
 
