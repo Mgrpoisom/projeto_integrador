@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração - Gestão de Creches</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Painel Administrativo</h1>
+            <ul>
+                <li><a href="/">Visão Pública</a></li>
+                <li><a href="/admin">Dashboard</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container" style="grid-template-columns: 1fr;">
+            <div class="card" style="display: flex; justify-content: space-around; text-align: center;">
+                <div>
+                    <h3>Vagas Totais</h3>
+                    <div id="totalVagas" class="badge" style="font-size: 1.5rem; padding: 0.5rem 1.5rem;">0</div>
+                </div>
+                <div>
+                    <h3>Ocupadas</h3>
+                    <div id="vagasOcupadas" class="badge" style="background: #ef4444; font-size: 1.5rem; padding: 0.5rem 1.5rem;">0</div>
+                </div>
+                <div>
+                    <h3>Na Fila</h3>
+                    <div id="naFila" class="badge" style="background: #f59e0b; font-size: 1.5rem; padding: 0.5rem 1.5rem;">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Ajustar Capacidade</h2>
+                <div class="form-group" style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div style="flex: 1;">
+                        <label for="novaCapacidade">Nova Capacidade da Unidade</label>
+                        <input type="number" id="novaCapacidade" min="1">
+                    </div>
+                    <button onclick="atualizarCapacidade()" class="btn-primary" style="width: auto;">Salvar Alteração</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Gestão de Alunos e Solicitantes</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome Completo</th>
+                            <th>Responsável</th>
+                            <th>Categoria</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <!-- Preenchido via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function carregarDashboard() {
+            const res = await fetch('/api/admin/stats');
+            const stats = await res.json();
+            document.getElementById('totalVagas').innerText = stats.capacidade_total;
+            document.getElementById('vagasOcupadas').innerText = stats.vagas_ocupadas;
+            document.getElementById('naFila').innerText = stats.na_fila;
+            document.getElementById('novaCapacidade').value = stats.capacidade_total;
+
+            const resCriancas = await fetch('/api/admin/criancas');
+            const criancas = await resCriancas.json();
+            const body = document.getElementById('adminTableBody');
+            body.innerHTML = criancas.map(c => `
+                <tr>
+                    <td>${c.nome}</td>
+                    <td>${c.responsavel}</td>
+                    <td>${c.categoria}</td>
+                    <td><span class="badge" style="background: ${c.status === 'matriculada' ? '#10b981' : '#f59e0b'}">${c.status}</span></td>
+                    <td>
+                        ${c.status === 'aguardando' ? 
+                            `<button onclick="matricularManual(${c.id})" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Matricular</button>` : 
+                            '--'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function atualizarCapacidade() {
+            const cap = document.getElementById('novaCapacidade').value;
+            await fetch('/api/admin/unidade/capacidade', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({capacidade: parseInt(cap)})
+            });
+            alert('Capacidade atualizada!');
+            carregarDashboard();
+        }
+
+        async function matricularManual(id) {
+            if(confirm('Deseja matricular esta criança manualmente?')) {
+                const res = await fetch(`/api/admin/matricular/${id}`, {method: 'POST'});
+                const data = await res.json();
+                alert(data.mensagem || data.erro);
+                carregarDashboard();
+            }
+        }
+
+        carregarDashboard();
+    </script>
+</body>
+</html>

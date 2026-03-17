@@ -12,9 +12,9 @@
         <nav>
             <h1>Portal de Creches Municipais</h1>
             <ul>
-                <li><a href="#">Início</a></li>
-                <li><a href="#">Consulta de Fila</a></li>
-                <li><a href="#">Administração</a></li>
+                <li><a href="/">Início</a></li>
+                <li><a href="#filaSection">Consulta de Fila</a></li>
+                <li><a href="/admin">Administração</a></li>
             </ul>
         </nav>
     </header>
@@ -46,9 +46,25 @@
                 </form>
             </div>
 
-            <div class="card">
+            <div class="card" id="filaSection">
                 <h2>Lista de Espera Transparente</h2>
                 <div id="statusUnidade"></div>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="text" id="buscaNome" placeholder="Pesquisar por iniciais (ex: J.S.)..." oninput="filtrarFila()">
+                    </div>
+                    <div style="width: 200px;">
+                        <select id="filtroCategoria" onchange="filtrarFila()">
+                            <option value="">Todas as Categorias</option>
+                            <option value="Berçário I">Berçário I</option>
+                            <option value="Berçário II">Berçário II</option>
+                            <option value="Maternal I">Maternal I</option>
+                            <option value="Maternal II">Maternal II</option>
+                        </select>
+                    </div>
+                </div>
+
                 <table id="filaTable">
                     <thead>
                         <tr>
@@ -92,26 +108,51 @@
             }
         };
 
+        let dadosFilaOriginal = [];
+
         async function carregarFila() {
             const resFila = await fetch('/api/fila');
-            const fila = await resFila.json();
-            const body = document.getElementById('filaBody');
-            body.innerHTML = fila.map(c => `
-                <tr>
-                    <td>${c.posicao}º</td>
-                    <td>${c.nome.split(' ').map(n => n[0]).join('')}.</td>
-                    <td>${c.categoria}</td>
-                    <td>${c.pontuacao} pts</td>
-                </tr>
-            `).join('');
-
+            dadosFilaOriginal = await resFila.json();
+            
             const resStatus = await fetch('/api/status');
             const status = await resStatus.json();
             document.getElementById('statusUnidade').innerHTML = `
                 <p><strong>Unidade:</strong> ${status.unidade}</p>
                 <p><strong>Vagas Disponíveis:</strong> <span class="badge">${status.vagas_disponiveis}</span></p>
             `;
+            
+            renderizarFila(dadosFilaOriginal);
         }
+
+        function renderizarFila(dados) {
+            const body = document.getElementById('filaBody');
+            body.innerHTML = dados.map(c => {
+                const iniciais = c.nome.split(' ').map(n => n[0]).join('') + '.';
+                return `
+                    <tr>
+                        <td>${c.posicao}º</td>
+                        <td>${iniciais}</td>
+                        <td>${c.categoria}</td>
+                        <td>${c.pontuacao} pts</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filtrarFila() {
+            const busca = document.getElementById('buscaNome').value.toLowerCase();
+            const categoria = document.getElementById('filtroCategoria').value;
+
+            const filtrados = dadosFilaOriginal.filter(c => {
+                const iniciais = c.nome.split(' ').map(n => n[0]).join('').toLowerCase();
+                const bateNome = iniciais.includes(busca.replace(/[^a-z]/g, '')) || c.nome.toLowerCase().includes(busca);
+                const bateCategoria = categoria === "" || c.categoria === categoria;
+                return bateNome && bateCategoria;
+            });
+
+            renderizarFila(filtrados);
+        }
+
         carregarFila();
     </script>
 

@@ -15,7 +15,15 @@
 - [ ] **Infraestrutura e Segurança**
     - [x] Criar arquivo `.env` para gestão de segredos
     - [x] Configurar Docker para PostgreSQL
-    - [ ] Criar imagem Docker do banco de dados
+    - [x] Configurar persistência local do banco de dados (postgres_data)
+    - [x] Inicializar repositório Git e realizar primeiro push
 - [x] **Verificação e Testes**
     - [x] Criar testes unitários para a lógica de prioridade
     - [x] Validar fluxo de matrícula automática ao liberar vaga
+
+- [x] **Melhorias: Administração e Consulta**
+    - [x] Criar Dashboard administrativo (Contagem de vagas total/ocupadas)
+    - [x] Implementar gestão de capacidade por interface
+    - [x] Adicionar busca por nome/CPF na consulta pública
+    - [x] Implementar filtros por categoria (Berçário/Maternal)
+    - [x] Adicionar botões de ação na Admin (Matricular Manual, Editar)

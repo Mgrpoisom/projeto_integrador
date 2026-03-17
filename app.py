@@ -81,6 +81,58 @@ def ver_fila():
     } for i, c in enumerate(fila)]
     return jsonify(resultado)
 
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
+@app.route('/api/admin/stats')
+def admin_stats():
+    unidade = Unidade.query.first()
+    vagas_ocupadas = Crianca.query.filter_by(status='matriculada').count()
+    na_fila = Crianca.query.filter_by(status='aguardando').count()
+    return jsonify({
+        "unidade": unidade.nome,
+        "capacidade_total": unidade.capacidade_total,
+        "vagas_ocupadas": vagas_ocupadas,
+        "vagas_disponiveis": unidade.capacidade_total - vagas_ocupadas,
+        "na_fila": na_fila
+    })
+
+@app.route('/api/admin/unidade/capacidade', methods=['POST'])
+def update_capacidade():
+    data = request.json
+    unidade = Unidade.query.first()
+    unidade.capacidade_total = data['capacidade']
+    db.session.commit()
+    return jsonify({"mensagem": "Capacidade atualizada com sucesso!"})
+
+@app.route('/api/admin/criancas')
+def admin_criancas():
+    # Retorna todas as crianças com dados completos para o admin
+    criancas = Crianca.query.order_by(Crianca.data_cadastro.desc()).all()
+    return jsonify([{
+        "id": c.id,
+        "nome": c.nome,
+        "responsavel": c.responsavel,
+        "categoria": c.categoria,
+        "pontuacao": c.pontuacao,
+        "status": c.status,
+        "data_cadastro": c.data_cadastro.strftime('%d/%m/%Y %H:%M')
+    } for c in criancas])
+
+@app.route('/api/admin/matricular/<int:id>', methods=['POST'])
+def matricular_manual(id):
+    crianca = Crianca.query.get_or_404(id)
+    if crianca.status == 'matriculada':
+        return jsonify({"erro": "Criança já está matriculada"}), 400
+    
+    unidade = Unidade.query.first()
+    crianca.status = 'matriculada'
+    matricula = Matricula(crianca_id=crianca.id, unidade_id=unidade.id)
+    db.session.add(matricula)
+    db.session.commit()
+    return jsonify({"mensagem": f"Matrícula de {crianca.nome} realizada manualmente."})
+
 @app.route('/api/status')
 def status():
     unidade = Unidade.query.first()
@@ -94,4 +146,4 @@ def status():
 
 if __name__ == '__main__':
     setup_app()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
