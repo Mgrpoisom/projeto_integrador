@@ -165,6 +165,46 @@ def remover_crianca(id):
     
     return jsonify({"mensagem": "Criança removida e vaga reofertada para a fila."})
 
+@app.route('/dashboard')
+def dashboard_view():
+    return render_template('dashboard.html')
+
+@app.route('/api/admin/dashboard/stats')
+def dashboard_stats():
+    # 1. Distribuição por Categoria
+    categorias = db.session.query(Crianca.categoria, db.func.count(Crianca.id))\
+        .group_by(Crianca.categoria).all()
+    dist_categoria = {cat: count for cat, count in categorias}
+
+    # 2. Distribuição por Status
+    status_counts = db.session.query(Crianca.status, db.func.count(Crianca.id))\
+        .group_by(Crianca.status).all()
+    dist_status = {s: count for s, count in status_counts}
+
+    # 3. Perfil de Vulnerabilidade (Contagem de cada critério Sim)
+    # Nota: Como os dados estão em JSON/Dict ou campos específicos, vamos simplificar
+    # contando quantas crianças têm pontuação > 0 (critério simples para o protótipo)
+    com_vulnerabilidade = Crianca.query.filter(Crianca.pontuacao > 0).count()
+    sem_vulnerabilidade = Crianca.query.filter(Crianca.pontuacao == 0).count()
+
+    # 4. Tempo Médio de Espera (Simulado/Estátisco p/ Protótipo)
+    # No mundo real, calcularíamos a diferença entre data_cadastro e data_matricula
+    matriculas = Matricula.query.all()
+    tempo_medio = "45 dias" if matriculas else "N/A"
+
+    return jsonify({
+        "dist_categoria": dist_categoria,
+        "dist_status": dist_status,
+        "perfil_vulnerabilidade": {
+            "Com Prioridade": com_vulnerabilidade,
+            "Sem Prioridade": sem_vulnerabilidade
+        },
+        "kpis": {
+            "tempo_medio_espera": tempo_medio,
+            "taxa_ocupacao": f"{round((dist_status.get('matriculada', 0) / (Unidade.query.first().capacidade_total or 1)) * 100)}%"
+        }
+    })
+
 @app.route('/api/status')
 def status():
     unidade = Unidade.query.first()

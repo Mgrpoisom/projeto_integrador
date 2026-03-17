@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estatísticas - Gestão de Creches</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Indicadores de Gestão</h1>
+            <ul>
+                <li><a href="/">Visão Pública</a></li>
+                <li><a href="/admin">Administração</a></li>
+                <li><a href="/dashboard" class="active">Estatísticas</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px;">
+            <!-- KPIs Topo -->
+            <div class="card" style="grid-column: span 2; display: flex; justify-content: space-around; text-align: center;">
+                <div>
+                    <h3>Tempo Médio de Espera</h3>
+                    <div id="kpiTempo" class="badge" style="background: #6366f1; font-size: 1.2rem; padding: 0.5rem 1rem;">Carregando...</div>
+                </div>
+                <div>
+                    <h3>Taxa de Ocupação</h3>
+                    <div id="kpiOcupacao" class="badge" style="background: #10b981; font-size: 1.2rem; padding: 0.5rem 1rem;">Carregando...</div>
+                </div>
+            </div>
+
+            <!-- Gráfico 1: Categorias -->
+            <div class="card">
+                <h2>Crianças por Categoria</h2>
+                <div style="height: 300px;">
+                    <canvas id="chartCategorias"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico 2: Perfil Vulnerabilidade -->
+            <div class="card">
+                <h2>Perfil de Prioridade</h2>
+                <div style="height: 300px;">
+                    <canvas id="chartVulnerabilidade"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico 3: Status Geral -->
+            <div class="card" style="grid-column: span 2;">
+                <h2>Status das Solicitações</h2>
+                <div style="height: 300px;">
+                    <canvas id="chartStatus"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function carregarGraficos() {
+            const res = await fetch('/api/admin/dashboard/stats');
+            const data = await res.json();
+
+            // Atualiza KPIs
+            document.getElementById('kpiTempo').innerText = data.kpis.tempo_medio_espera;
+            document.getElementById('kpiOcupacao').innerText = data.kpis.taxa_ocupacao;
+
+            // Gráfico de Categorias (Barras)
+            new Chart(document.getElementById('chartCategorias'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.dist_categoria),
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: Object.values(data.dist_categoria),
+                        backgroundColor: '#2563eb',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Gráfico de Vulnerabilidade (Pizza)
+            new Chart(document.getElementById('chartVulnerabilidade'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(data.perfil_vulnerabilidade),
+                    datasets: [{
+                        data: Object.values(data.perfil_vulnerabilidade),
+                        backgroundColor: ['#f59e0b', '#cbd5e1']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Gráfico de Status (Linha ou Barra Horizontal)
+            new Chart(document.getElementById('chartStatus'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.dist_status),
+                    datasets: [{
+                        data: Object.values(data.dist_status),
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        carregarGraficos();
+    </script>
+</body>
+</html>
