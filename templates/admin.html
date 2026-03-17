@@ -85,12 +85,24 @@
                     <td>${c.categoria}</td>
                     <td><span class="badge" style="background: ${c.status === 'matriculada' ? '#10b981' : '#f59e0b'}">${c.status}</span></td>
                     <td>
-                        ${c.status === 'aguardando' ? 
-                            `<button onclick="matricularManual(${c.id})" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Matricular</button>` : 
-                            '--'}
+                        <div style="display: flex; gap: 0.5rem;">
+                            ${c.status === 'aguardando' ? 
+                                `<button onclick="matricularManual(${c.id})" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Matricular</button>` : 
+                                ''}
+                            <button onclick="registrarSaida(${c.id}, '${c.nome}')" class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444;">Saída</button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        async function registrarSaida(id, nome) {
+            if(confirm(`Deseja registrar a saída/abandono de ${nome}? Isso liberará uma vaga.`)) {
+                const res = await fetch(`/api/admin/remover/${id}`, {method: 'POST'});
+                const data = await res.json();
+                alert(data.mensagem);
+                carregarDashboard();
+            }
         }
 
         async function atualizarCapacidade() {

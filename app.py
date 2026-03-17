@@ -133,6 +133,38 @@ def matricular_manual(id):
     db.session.commit()
     return jsonify({"mensagem": f"Matrícula de {crianca.nome} realizada manualmente."})
 
+def processar_fila():
+    unidade = Unidade.query.first()
+    vagas_ocupadas = Crianca.query.filter_by(status='matriculada').count()
+    vagas_livres = unidade.capacidade_total - vagas_ocupadas
+    
+    if vagas_livres > 0:
+        # Pega os próximos da fila por prioridade
+        na_fila = Crianca.query.filter_by(status='aguardando')\
+            .order_by(Crianca.pontuacao.desc(), Crianca.data_cadastro.asc())\
+            .limit(vagas_livres).all()
+        
+        for crianca in na_fila:
+            crianca.status = 'matriculada'
+            matricula = Matricula(crianca_id=crianca.id, unidade_id=unidade.id)
+            db.session.add(matricula)
+        
+        db.session.commit()
+
+@app.route('/api/admin/remover/<int:id>', methods=['POST'])
+def remover_crianca(id):
+    crianca = Crianca.query.get_or_404(id)
+    # Remove matrículas associadas
+    Matricula.query.filter_by(crianca_id=id).delete()
+    # Marca como removida ou deleta (vamos marcar como 'removida' para histórico se quiser, mas aqui deletaremos para simplificar a vaga)
+    db.session.delete(crianca)
+    db.session.commit()
+    
+    # Processa a fila para preencher a vaga aberta
+    processar_fila()
+    
+    return jsonify({"mensagem": "Criança removida e vaga reofertada para a fila."})
+
 @app.route('/api/status')
 def status():
     unidade = Unidade.query.first()
